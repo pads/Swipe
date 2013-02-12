@@ -128,9 +128,6 @@ Swipe.prototype = {
       this._stack(refArray[1],0);
       this._stack(refArray[2],1);
 
-      // run translations for remaining slides
-      //TODO
-
     } else {
       // move "viewport" to put current slide into view
       this.element.style.left = (this.index * -this.width) + "px";
@@ -306,7 +303,12 @@ Swipe.prototype = {
             : 1 );                                          // no resistance if false
 
       // translate immediately 1:1
-      _this._move([_this.index - 1,_this.index,_this.index + 1,this.index + 2],_this.deltaX);
+      if(_this.widthReduction) {
+        var slideIndices = _this._getAllSlideIndices();
+        _this._move(slideIndices,_this.deltaX);
+      } else {
+        _this._move([_this.index - 1,_this.index,_this.index + 1],_this.deltaX);
+      }
 
     } else if (_this.disableScroll) {
 
@@ -337,14 +339,24 @@ Swipe.prototype = {
     // if not scrolling vertically
     if (!_this.isScrolling) {
 
+      var slideIndices = _this._getAllSlideIndices();
+
       if (isValidSlide && !isPastBounds) {
         if (direction) {
-          _this._stack([_this.index - 1],-1);
-          _this._slide([_this.index,_this.index + 1,_this.index + 2],-_this.width,_this.speed);
+          if(_this.widthReduction > 0) {
+            _this._slide(slideIndices.slice(1, slideIndices.length),-_this.width,_this.speed);
+          } else {
+            _this._stack([_this.index - 1],-1);
+            _this._slide([_this.index,_this.index + 1],-_this.width,_this.speed);
+          }
           _this.index += 1;
         } else {
-          _this._stack([_this.index + 1],1);
-          _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
+          if(_this.widthReduction > 0) {
+            _this._slide(slideIndices,_this.width,_this.speed);
+          } else {
+            _this._stack([_this.index + 1],1);
+            _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
+          }
           _this.index += -1;
         }
         _this.callback(_this.index,_this.slides[_this.index]);
@@ -415,14 +427,14 @@ Swipe.prototype = {
   },
 
   _stack: function(nums,pos) {  // pos: -1:left 0:center 1:right
-
+    console.log("pos: " + pos);
     var _slides = this.slides,
       l = nums.length,
       dist = this.width * pos;
 
     while (l--) {
-      if (nums[l] > 1) {
-        dist = dist * 2;
+      if (nums[l] > 1 && this.widthReduction > 0) {
+        dist += this.width;
       }
       this._translate(_slides[nums[l]],dist,0);
 
@@ -505,6 +517,14 @@ Swipe.prototype = {
 
     return parseInt(elem.getAttribute('data-index'),10);
 
+  },
+
+  _getAllSlideIndices: function() {
+    var slideIndices = [];
+    for ( var index = -1; index < this.slides.length; index++ ) {
+      slideIndices.push(index);
+    }
+    return slideIndices;
   }
 
 };
