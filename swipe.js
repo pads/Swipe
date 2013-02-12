@@ -427,7 +427,7 @@ Swipe.prototype = {
   },
 
   _stack: function(nums,pos) {  // pos: -1:left 0:center 1:right
-    console.log("pos: " + pos);
+    
     var _slides = this.slides,
       l = nums.length,
       dist = this.width * pos;
