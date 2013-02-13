@@ -54,6 +54,11 @@ window.Swipe = function(element,options) {
 
   // add event listeners
   if (this.element.addEventListener) {
+    if (window.navigator.msPointerEnabled) {
+      this.element.addEventListener("MSPointerDown",this,false);
+      this.element.addEventListener("MSPointerMove",this,false);
+      this.element.addEventListener("MSPointerUp",this,false);
+    }
     if (!!this.browser.touch) {
       this.element.addEventListener('touchstart',this,false);
       this.element.addEventListener('touchmove',this,false);
@@ -222,12 +227,15 @@ Swipe.prototype = {
   handleEvent: function(e) {
     switch (e.type) {
       case 'touchstart':
+      case 'MSPointerDown':
         this.onTouchStart(e);
         break;
       case 'touchmove':
+      case 'MSPointerMove':
         this.onTouchMove(e);
         break;
       case 'touchend':
+      case 'MSPointerUp':
         this.onTouchEnd(e);
         break;
       case 'webkitTransitionEnd':
@@ -248,6 +256,8 @@ Swipe.prototype = {
   onTouchStart: function(e) {
 
     var _this = this;
+
+    e = _this._convertIE10Event(e);
 
     _this.start = {
 
@@ -272,8 +282,14 @@ Swipe.prototype = {
 
     var _this = this;
 
+    e = _this._convertIE10Event(e);
+
     // ensure swiping with one touch and not pinching
-    if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
+    if (window.navigator.msPointerEnabled) {
+      if ((e.pointerType == e.MSPOINTER_TYPE_MOUSE && e.buttons != 1) || !e.isPrimary) return;
+    } else {
+      if (e.touches.length > 1 || e.scale && e.scale !== 1) return;
+    }
 
     _this.deltaX = e.touches[0].pageX - _this.start.pageX;
 
@@ -322,6 +338,8 @@ Swipe.prototype = {
   onTouchEnd: function(e) {
 
     var _this = this;
+
+    if (window.navigator.msPointerEnabled && !e.isPrimary) return;
 
     // determine if slide attempt triggers next/prev slide
     var isValidSlide =
@@ -525,6 +543,13 @@ Swipe.prototype = {
       slideIndices.push(index);
     }
     return slideIndices;
+  },
+  // IE 10 event properties are different so convert to an event object the rest of the code can handle
+  _convertIE10Event: function(e) {
+    if (window.navigator.msPointerEnabled) {
+      e.touches = [{ pageX:e.pageX, pageY:e.pageY }];
+    }
+    return e;
   }
 
 };
