@@ -353,7 +353,6 @@ Swipe.prototype = {
           || _this.index == _this.length - 1 && _this.deltaX < 0, // or if last slide and slide amt is less than 0
 
       direction = _this.deltaX < 0; // true:right false:left
-
     // if not scrolling vertically
     if (!_this.isScrolling) {
 
@@ -362,7 +361,11 @@ Swipe.prototype = {
       if (isValidSlide && !isPastBounds) {
         if (direction) {
           if(_this.widthReduction > 0) {
-            _this._slide(slideIndices.slice(1, slideIndices.length),-_this.width,_this.speed);
+            var width = _this.width;
+            if(_this.index === _this.length - 2) {
+              width = _this.width - this.widthReduction;
+            }
+            _this._slide(slideIndices.slice(1, slideIndices.length),-width,_this.speed);
           } else {
             _this._stack([_this.index - 1],-1);
             _this._slide([_this.index,_this.index + 1],-_this.width,_this.speed);
@@ -370,7 +373,11 @@ Swipe.prototype = {
           _this.index += 1;
         } else {
           if(_this.widthReduction > 0) {
-            _this._slide(slideIndices,_this.width,_this.speed);
+            var width = _this.width;
+            if(_this.index === _this.length - 1) {
+              width = _this.width - this.widthReduction;
+            }
+            _this._slide(slideIndices,width,_this.speed);
           } else {
             _this._stack([_this.index + 1],1);
             _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
