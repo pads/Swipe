@@ -24,7 +24,7 @@ window.Swipe = function(element,options) {
     })(),
     transitions: (function() {
       var temp = document.createElement('swipe'),
-        props = ['perspectiveProperty','WebkitPerspective','MozPerspective','OPerspective','msPerspective'];
+        props = ['transformProperty', 'WebkitTransform', 'MozTransform', 'OTransform', 'msTransform'];
       for ( var i in props ) {
         if (temp.style[ props[i] ] !== undefined) return true;
       }
@@ -427,7 +427,7 @@ Swipe.prototype = {
   },
 
   _stack: function(nums,pos) {  // pos: -1:left 0:center 1:right
-    
+
     var _slides = this.slides,
       l = nums.length,
       dist = this.width * pos;
