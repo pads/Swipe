@@ -41,7 +41,7 @@ window.Swipe = function(element,options) {
   this.delay = options.auto || 0;
   this.cont = (options.continuous != undefined) ? !!options.continuous : true;
   this.disableScroll = !!options.disableScroll;
-  this.widthReduction = options.widthReduction || 0;
+  this.maxWidth = options.maxWidth || 0;
 
   // verify index is a number not string
   this.index = parseInt(this.index,10);
@@ -95,8 +95,8 @@ Swipe.prototype = {
     if (this.length < 2) return;
 
     // determine width of each slide
-    this.width = this.container.getBoundingClientRect().width || this.container.offsetWidth;
-    this.width = this.width - this.widthReduction;
+    this.totalWidth = this.container.getBoundingClientRect().width || this.container.offsetWidth;
+    this.width = this.maxWidth || this.totalWidth;
     // return immediately if measurement fails
     if (!this.width) return;
 
@@ -319,7 +319,7 @@ Swipe.prototype = {
             : 1 );                                          // no resistance if false
 
       // translate immediately 1:1
-      if(_this.widthReduction) {
+      if(_this.maxWidth) {
         var slideIndices = _this._getAllSlideIndices();
         _this._move(slideIndices,_this.deltaX);
       } else {
@@ -360,10 +360,10 @@ Swipe.prototype = {
 
       if (isValidSlide && !isPastBounds) {
         if (direction) {
-          if(_this.widthReduction > 0) {
+          if(_this.maxWidth > 0) {
             var width = _this.width;
             if(_this.index === _this.length - 2) {
-              width = _this.width - this.widthReduction;
+              width = _this.width - (this.totalWidth - this.maxWidth);
             }
             _this._slide(slideIndices.slice(1, slideIndices.length),-width,_this.speed);
           } else {
@@ -372,10 +372,10 @@ Swipe.prototype = {
           }
           _this.index += 1;
         } else {
-          if(_this.widthReduction > 0) {
+          if(_this.maxWidth > 0) {
             var width = _this.width;
             if(_this.index === _this.length - 1) {
-              width = _this.width - this.widthReduction;
+              width = _this.width - (this.totalWidth - this.maxWidth);
             }
             _this._slide(slideIndices,width,_this.speed);
           } else {
@@ -458,7 +458,7 @@ Swipe.prototype = {
       dist = this.width * pos;
 
     while (l--) {
-      if (nums[l] > 1 && this.widthReduction > 0) {
+      if (nums[l] > 1 && this.maxWidth > 0) {
         dist += this.width;
       }
       this._translate(_slides[nums[l]],dist,0);
