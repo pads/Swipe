@@ -388,6 +388,8 @@ Swipe.prototype = {
       } else {
         if(_this.maxWidth > 0) {
           _this._slide(slideIndices,0,_this.speed);
+        } else if(_this.cont) {
+          _this.index === 0 ? _this.slide(_this.length - 1,_this.speed) : _this.slide(0,_this.speed);
         } else {
           _this._slide([_this.index - 1,_this.index,_this.index + 1],0,_this.speed);
         }
