@@ -386,7 +386,11 @@ Swipe.prototype = {
         }
         _this.callback(_this.index,_this.slides[_this.index]);
       } else {
-        _this._slide([_this.index - 1,_this.index,_this.index + 1],0,_this.speed);
+        if(_this.maxWidth > 0) {
+          _this._slide(slideIndices,0,_this.speed);
+        } else {
+          _this._slide([_this.index - 1,_this.index,_this.index + 1],0,_this.speed);
+        }
       }
 
     }
