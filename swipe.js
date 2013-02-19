@@ -76,7 +76,7 @@ window.Swipe = function(element,options) {
   // to play nice with old IE
   else {
     window.onresize = function() {
-      _this.setup();
+      _this.setup(true);
     };
   }
 
@@ -84,7 +84,10 @@ window.Swipe = function(element,options) {
 
 Swipe.prototype = {
 
-  setup: function() {
+  setup: function(resizing) {
+
+    // resizing causes slide position issues if there is more than one slide visible
+    if(resizing && this.maxWidth) return;
 
     // get and measure amt of slides
     this.slides = this.element.children;
@@ -246,7 +249,7 @@ Swipe.prototype = {
         this.onTransitionEnd(e);
         break;
       case 'resize':
-        this.setup();
+        this.setup(true);
         break;
     }
 
