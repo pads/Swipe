@@ -136,6 +136,11 @@ Swipe.prototype = {
       this._stack(refArray[1],0);
       this._stack(refArray[2],1);
 
+      // stack last slide to the left of first if continuous
+      if(this.cont) {
+        this._stack([this.length - 1],-1);
+      }
+
     } else {
       // move "viewport" to put current slide into view
       this.element.style.left = (this.index * -this.width) + "px";
@@ -314,7 +319,8 @@ Swipe.prototype = {
       // increase resistance if first or last slide
       _this.deltaX =
         _this.deltaX /
-          ( (!_this.index && _this.deltaX > 0               // if first slide and sliding left
+          ( (!this.cont
+            && !_this.index && _this.deltaX > 0               // if first slide and sliding left
             || _this.index == _this.length - 1              // or if last slide and sliding right
             && _this.deltaX < 0                            // and if sliding at all
             ) ?
@@ -326,7 +332,17 @@ Swipe.prototype = {
         var slideIndices = _this._getAllSlideIndices();
         _this._move(slideIndices,_this.deltaX);
       } else {
-        _this._move([_this.index - 1,_this.index,_this.index + 1],_this.deltaX);
+        if(_this.cont) {
+          if(_this.index === 0) {
+            _this._move([_this.length - 1 - _this.index,_this.index,_this.index + 1],_this.deltaX);
+          } else if(_this.index === _this.length - 1) {
+            _this._move([_this.index - 1,_this.index,0],_this.deltaX);
+          } else {
+            _this._move([_this.index - 1,_this.index,_this.index + 1],_this.deltaX);
+          }
+        } else {
+          _this._move([_this.index - 1,_this.index,_this.index + 1],_this.deltaX);
+        }
       }
 
     } else if (_this.disableScroll) {
@@ -360,18 +376,36 @@ Swipe.prototype = {
     if (!_this.isScrolling) {
 
       var slideIndices = _this._getAllSlideIndices();
-
-      if (isValidSlide && !isPastBounds) {
+      if (isValidSlide && !isPastBounds || this.cont) {
         if (direction) {
           if(_this.maxWidth > 0) {
             var width = _this.width;
             if(_this.index === _this.length - 2) {
-              width = _this.width - (this.totalWidth - this.maxWidth);
+              width = _this.width - (_this.totalWidth - _this.maxWidth);
             }
             _this._slide(slideIndices.slice(1, slideIndices.length),-width,_this.speed);
           } else {
-            _this._stack([_this.index - 1],-1);
-            _this._slide([_this.index,_this.index + 1],-_this.width,_this.speed);
+            if(_this.cont) {
+              if(_this.index === 0) {
+                // Undo stacking last slide to the left of first slide once moving forward
+                _this._stack([_this.length - 1],1)
+              } else if(_this.index === _this.length - 2) {
+                _this._stack([0],1)
+              }
+              _this._stack([_this.index - 1],-1);
+              if(_this.index === _this.length - 1) {
+                _this._slide([_this.index,0],-_this.width,_this.speed);
+                for(var i = 1; i < _this.length - 1; i++) {
+                  _this._stack([i],1);
+                }
+                _this.index = -1;
+              } else {
+                _this._slide([_this.index,_this.index + 1],-_this.width,_this.speed);
+              }
+            } else {
+              _this._stack([_this.index - 1],-1);
+              _this._slide([_this.index,_this.index + 1],-_this.width,_this.speed);
+            }
           }
           _this.index += 1;
         } else {
@@ -383,16 +417,32 @@ Swipe.prototype = {
             _this._slide(slideIndices,width,_this.speed);
           } else {
             _this._stack([_this.index + 1],1);
-            _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
+           if(_this.cont) {
+             if(_this.index === 0) {
+               _this._slide([_this.length - 1 - _this.index,_this.index],_this.width,_this.speed);
+               _this.index = _this.length - 1;
+               _this._stack([_this.index - 1],-1);
+             } else {
+               _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
+               _this._stack([_this.index - 2],-1);
+               _this.index += -1;
+               if(_this.index === 0) {
+                 _this._stack([this.length - 1],-1);
+               }
+             }
+           } else {
+             _this._slide([_this.index - 1,_this.index],_this.width,_this.speed);
+             _this.index += -1;
+           }
           }
-          _this.index += -1;
+          if(!_this.cont) {
+            _this.index += -1;
+          }
         }
         _this.callback(_this.index,_this.slides[_this.index]);
       } else {
         if(_this.maxWidth > 0) {
           _this._slide(slideIndices,0,_this.speed);
-        } else if(_this.cont) {
-          _this.index === 0 ? _this.slide(_this.length - 1,_this.speed) : _this.slide(0,_this.speed);
         } else {
           _this._slide([_this.index - 1,_this.index,_this.index + 1],0,_this.speed);
         }
