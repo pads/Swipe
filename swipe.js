@@ -98,7 +98,7 @@ Swipe.prototype = {
     if (this.length < 2) return;
 
     // determine width of each slide
-    this.totalWidth = this.container.getBoundingClientRect().width || this.container.offsetWidth;
+    this.totalWidth = this.container.getBoundingClientRect().width || this.container.offsetWidth || window.innerWidth;
     this.width = this.maxWidth || this.totalWidth;
     // return immediately if measurement fails
     if (!this.width) return;
