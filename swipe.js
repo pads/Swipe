@@ -110,8 +110,10 @@ Swipe.prototype = {
       []
     ];
 
-    this.element.style.width = (this.slides.length * this.width) + 'px';
-
+    // stop the width from being set if in single-slide mode as this breaks zooming if it is disabled
+    if(this.maxWidth) {
+      this.element.style.width = (this.slides.length * this.width) + 'px';
+    }
     // stack elements
     for ( var index = this.length - 1; index > -1; index-- ) {
 
@@ -268,7 +270,10 @@ Swipe.prototype = {
 
     var _this = this;
 
+    // apply the width when interacted so that the slides work, viewport zooming wont happen here anyway
     if(!this.maxWidth) {
+      _this.element.style.width = (_this.slides.length * _this.width) + 'px';
+
       for ( var index = this.length - 1; index > -1; index-- ) {
         var elem = this.slides[index];
         elem.style.display = 'block';
