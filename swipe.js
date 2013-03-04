@@ -118,6 +118,9 @@ Swipe.prototype = {
       var elem = this.slides[index];
 
       elem.style.width = this.width + 'px';
+      if(index > 0 && !this.maxWidth) {
+        elem.style.visibility = 'hidden';
+      }
       elem.setAttribute('data-index',index);
 
       if (this.browser.transitions) {
@@ -264,6 +267,13 @@ Swipe.prototype = {
   onTouchStart: function(e) {
 
     var _this = this;
+
+    if(!this.maxWidth) {
+      for ( var index = this.length - 1; index > -1; index-- ) {
+        var elem = this.slides[index];
+        elem.style.visibility = 'visible';
+      }
+    }
 
     e = _this._convertIE10Event(e);
 
