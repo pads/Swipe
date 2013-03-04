@@ -119,7 +119,7 @@ Swipe.prototype = {
 
       elem.style.width = this.width + 'px';
       if(index > 0 && !this.maxWidth) {
-        elem.style.visibility = 'hidden';
+        elem.style.display = 'none';
       }
       elem.setAttribute('data-index',index);
 
@@ -271,7 +271,7 @@ Swipe.prototype = {
     if(!this.maxWidth) {
       for ( var index = this.length - 1; index > -1; index-- ) {
         var elem = this.slides[index];
-        elem.style.visibility = 'visible';
+        elem.style.display = 'block';
       }
     }
 
